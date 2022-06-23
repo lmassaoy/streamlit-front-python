@@ -1,0 +1,5 @@
+streamlit==1.10.0
+streamlit-lottie==0.0.3
+st-clickable-images==0.0.3
+streamlit-on-Hover-tabs==1.0.1
+streamlit-option-menu==0.3.2
