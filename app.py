@@ -5,11 +5,11 @@ import base64
 import json
 from turtle import width
 import requests
+from PIL import Image
 
 import streamlit as st
 from streamlit_lottie import st_lottie, st_lottie_spinner
 from st_clickable_images import clickable_images
-# from st_on_hover_tabs import on_hover_tabs
 from streamlit_option_menu import option_menu
 
 
@@ -17,12 +17,26 @@ TENSAI_HEADER_PNG = './utils/imgs/static/tensai_header.png'
 
 NAV_MENU = ["Home", "Games", "Commands", "Mechanics", "Character Styles", "The Project"]
 
+LEO_AVATAR = './utils/imgs/static/leo_avatar.png'
+YAMADA_AVATAR = './utils/imgs/static/yamada_avatar.png'
+P1_VS_P2 = './utils/imgs/static/p1_vs_p2.png'
+P1_AVATAR = './utils/imgs/static/p1.png'
+P2_AVATAR = './utils/imgs/static/p2.png'
+VERSUS_AVATAR = './utils/imgs/static/versus.png'
+
 DEFAULT_LOTTIE_QUALITY = 'high'
 LOTTIE_LOCAL_JSON_PATH_START_ARCADE = './utils/imgs/animated/87120-progress-screen-gif-arcade.json'
 LOTTIE_LOCAL_GIT_PATH_START_ARCADE = './utils/imgs/animated/87120-progress-screen-gif-arcade.gif'
 LOTTIE_LOCAL_JSON_PATH_FIGHTING = './utils/imgs/animated/26868-fighting.json'
 LOTTIE_LOCAL_JSON_PATH_JOYSTICK = './utils/imgs/animated/110018-wave.json'
 LOTTIE_LOCAL_JSON_PATH_CHOOSE = './utils/imgs/animated/19659-sliced-text-choose-your-fighter.json'
+LOTTIE_LOCAL_JSON_PATH_OHAYOU = './utils/imgs/animated/93881-morning-greeting.json'
+LOTTIE_LOCAL_JSON_PATH_TYPING = './utils/imgs/animated/93884-typing.json'
+LOTTIE_LOCAL_JSON_PATH_SHIBA_YATTA = './utils/imgs/animated/86964-shiba-happy.json'
+
+SOCIAL_GITHUB_LOGO = './utils/imgs/animated/81333-github.gif'
+SOCIAL_LINKEDIN_LOGO = './utils/imgs/animated/49413-linkedin-icon.gif'
+SOCIAL_TWITTER_LOGO = './utils/imgs/animated/49409-twitter-icon.gif'
 
 SFV_LOGO = './utils/imgs/static/games_logos/SF5_logo.jpg'
 DBFZ_LOGO = './utils/imgs/static/games_logos/DBFZ_logo.png'
@@ -45,17 +59,26 @@ PADDING_RIGHT = 0.1
 PADDING_LEFT = 0.1
 PADDING_BOTTOM = 1
 
+BLABLA = '''
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+'''
 BLABLABLA = '''
-    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
-    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
-    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
-    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
-    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
-    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
-    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
-    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
-    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
-    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
+    BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
 '''
 
 
@@ -105,19 +128,6 @@ st.markdown(build_padding_string('left',PADDING_LEFT), unsafe_allow_html=True)
 st.markdown(build_padding_string('bottom',PADDING_BOTTOM), unsafe_allow_html=True)
 
 
-# st.markdown(f""" <style>
-#     .reportview-container .main .block-container{{
-#         padding-top: {padding}rem;
-#         padding-right: {padding}rem;
-#         padding-left: {padding}rem;
-#         padding-bottom: 2rem;
-#     }} </style> """, unsafe_allow_html=True
-# )
-
-
-
-
-
 @st.cache(allow_output_mutation=True)
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -136,30 +146,25 @@ def get_img_with_href(local_img_path, target_url):
     return html_code
 
 
+@st.cache(allow_output_mutation=True)
+def get_social_media_href(social_medias):
+    html_code = '<div class="images">'
+    for local_img_path, target_url in social_medias:
+        img_format = os.path.splitext(local_img_path)[-1].replace('.', '')
+        bin_str = get_base64_of_bin_file(local_img_path)
+        html_code += f'''
+            <div style="float:left;margin-right:0px;">
+            <a href="{target_url}" target="_blank">
+                <img width="100px" src="data:image/{img_format};base64,{bin_str}"/>
+            </a>
+            </div>'''
+    html_code += '</div>'
+    return html_code
+
+
 def load_lottie_json(json_path: str):
     with open(json_path) as json_file:
         return json.load(json_file)
-
-
-def load_lottieurl(url: str):
-    r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    return r.json()
-
-
-# images = []
-# for file in [LOTTIE_LOCAL_GIT_PATH_START_ARCADE, LOTTIE_LOCAL_GIT_PATH_START_ARCADE]:
-#     with open(file, "rb") as image:
-#         encoded = base64.b64encode(image.read()).decode()
-#         images.append(f"data:image/jpeg;base64,{encoded}")
-
-# clicked = clickable_images(
-#     images,
-#     titles=[f"Image #{str(i)}" for i in range(2)],
-#     div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-#     img_style={"margin": "5px", "height": "200px"},
-# )
 
 
 def start():
@@ -169,21 +174,7 @@ def start():
 
 def main():
     if 'game_selected' not in st.session_state:
-        st.session_state['game_selected'] = None
-
-    # st.title('TENSAI')  
-    # st_lottie(load_lottie_json(LOTTIE_LOCAL_JSON_PATH_CHOOSE),
-    #     quality=DEFAULT_LOTTIE_QUALITY,
-    #     key="Arcade"
-    # )
-
-#    st.markdown(get_img_with_href(LOTTIE_LOCAL_GIT_PATH_START_ARCADE, 'https://github.com/lmassaoy'), unsafe_allow_html=True)
-    
-    # sample to use the grid for game titles
-    # st.markdown(f"Image #{clicked} clicked" if clicked > -1 else "No image clicked")
-
-    # st.markdown('# Started')
-    
+        st.session_state['game_selected'] = None  
 
     # Start!
     if 'app_started' not in st.session_state:
@@ -193,6 +184,7 @@ def main():
         start()
         st.session_state['app_started'] = True
 
+    # Header
     generate_page_header()
 
     game_clicked = None
@@ -203,27 +195,93 @@ def main():
     selected = option_menu("",
         NAV_MENU, 
         icons=['house', 'controller', 'dpad', 'gear-fill', 'caret-right-square', 'github'],
-        # menu_icon="joystick",
         orientation='horizontal',
         default_index=0
     )
 
+    # Page: Home
     if selected == NAV_MENU[0]:
-        home_col1, home_col2, home_col3, home_col4, home_col5 = st.columns((0.7,2,1,0.3,0.3))
-
-        with home_col2:
-            st.markdown('## About Us')
+        # About Us
+        home_about_us_col1, home_about_us_col2, home_about_us_col3, home_about_us_col4, home_about_us_col5 = st.columns((0.2,2,0.3,1,0.3))
+        with home_about_us_col2:
+            title('About Us',40,'left','black')
             st.markdown(BLABLABLA)
-            st.markdown('## Team members')
-            st.markdown('### Leonardo Bertella - CEO')
-        with home_col3:
-            st_lottie(load_lottie_json(LOTTIE_LOCAL_JSON_PATH_JOYSTICK),
+        with home_about_us_col4:
+            st_lottie(load_lottie_json(LOTTIE_LOCAL_JSON_PATH_OHAYOU),
                 quality=DEFAULT_LOTTIE_QUALITY,
-                loop=False,
+                loop=True,
+                # height=300,
+                # width=500,
+                key="Ohayou"
+            )
+        block_break()
+
+        # Our Mission
+        home_mission_col1, home_mission_col2, home_mission_col3, home_mission_col4, home_mission_col5 = st.columns((0.2,1.2,0.15,2,0.15))
+        with home_mission_col2:
+            st_lottie(load_lottie_json(LOTTIE_LOCAL_JSON_PATH_TYPING),
+                quality=DEFAULT_LOTTIE_QUALITY,
+                loop=True,
                 height=300,
+                # width=500,
                 key="Joy"
             )
+        with home_mission_col4:
+            title('Our Mission',40,'left','black')
+            st.markdown(BLABLABLA)
 
+        block_break() 
+
+        # The Team
+        home_team_header_col1, home_team_header_col2, home_team_header_col3, home_team_header_col4, home_team_header_col5 = st.columns((0.2,2,1,0.3,0.3))
+        with home_team_header_col2:
+            title('The Team',40,'left','black')
+
+        home_team_vs_col1, home_team_vs_col2, home_team_vs_col3, home_team_vs_col4, home_team_vs_col5 = st.columns((0.9,1,1,1,0.5))
+        with home_team_vs_col2:
+            with open(P1_AVATAR, "rb") as image:
+                encoded = base64.b64encode(image.read()).decode()
+            st.markdown(f'<img width="200px" src="data:image/jpeg;base64,{encoded}" alt="Versus" class="center">', unsafe_allow_html=True)
+        with home_team_vs_col3:
+            with open(VERSUS_AVATAR, "rb") as image:
+                encoded = base64.b64encode(image.read()).decode()
+            st.markdown(f'<img width="200px" src="data:image/jpeg;base64,{encoded}" alt="Versus" class="center">', unsafe_allow_html=True)
+        with home_team_vs_col4:
+            with open(P2_AVATAR, "rb") as image:
+                encoded = base64.b64encode(image.read()).decode()
+            st.markdown(f'<img width="200px" src="data:image/jpeg;base64,{encoded}" alt="Versus" class="center">', unsafe_allow_html=True)      
+
+        home_team_members_col1, home_team_members_col2, home_team_members_col3, home_team_members_col4, home_team_members_col5 = st.columns((0.2,1.5,0.2,1.5,0.2))
+        with home_team_members_col2:
+            title('Leo Bertella (CEO) 💭',35,'center','black')
+            st.markdown(BLABLA)
+            st.markdown('Social Medias')
+            st.markdown(get_social_media_href([(SOCIAL_GITHUB_LOGO,'https://github.com/lmassaoy/'),(SOCIAL_LINKEDIN_LOGO,'https://www.linkedin.com/in/luis-yamada/'),(SOCIAL_TWITTER_LOGO,'https://twitter.com/massaoyamada')]), unsafe_allow_html=True)
+        with home_team_members_col4:
+            title('Luis Yamada (CTO) 💻',35,'center','black')
+            st.markdown(BLABLA)
+            st.markdown('Social Medias')
+            st.markdown(get_social_media_href([(SOCIAL_GITHUB_LOGO,'https://github.com/lmassaoy/'),(SOCIAL_LINKEDIN_LOGO,'https://www.linkedin.com/in/luis-yamada/'),(SOCIAL_TWITTER_LOGO,'https://twitter.com/massaoyamada')]), unsafe_allow_html=True)
+
+        block_break() 
+
+        # Support Us
+        home_support_col1, home_support_col2, home_support_col3, home_support_col4, home_support_col5 = st.columns((0.2,2,0.3,1,0.3))
+        with home_support_col2:
+            title('Support Us 🥰',40,'left','black')
+            st.markdown('Together **WE** are stronger.')
+            st.markdown(BLABLABLA)
+        with home_support_col4:
+            st_lottie(load_lottie_json(LOTTIE_LOCAL_JSON_PATH_SHIBA_YATTA),
+                quality=DEFAULT_LOTTIE_QUALITY,
+                loop=True,
+                # height=300,
+                # width=500,
+                key="Yatta"
+            )
+
+
+    # Page: Games
     if selected == NAV_MENU[1]:
         games_logos = []
         for file in [SFV_LOGO,DBFZ_LOGO,GBVS_LOGO,GGS_LOGO,MK11_LOGO,TEKKEN7_LOGO]:
@@ -231,26 +289,11 @@ def main():
                 encoded = base64.b64encode(image.read()).decode()
                 games_logos.append(f"data:image/jpeg;base64,{encoded}")
 
-        
-        # with games_col2:
-        #     game_clicked = clickable_images(
-        #         games_logos,
-        #         titles=[f"{str(i)}" for i in range(5)],
-        #         div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-        #         img_style={"margin": "5px", "height": "120px"},
-        #     )
-        #     game_clicked
-        #     st.markdown('8===============D')
-
-        # with games_col3:
-        #     st.markdown(f'## {game_clicked}')
-        #     st.markdown(BLABLABLA)
-
         game_clicked = clickable_images(
             games_logos,
             titles=[f"{str(i)}" for i in range(5)],
             div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-            img_style={"margin": "5px", "height": "120px"},
+            img_style={"margin": "5px", "width": "250px"},
         )
         games_col1, games_col2, games_col3, games_col4, games_col5 = st.columns((0.7,1.8,2,0.3,0.3))
         with games_col2:
@@ -262,8 +305,7 @@ def main():
             st.session_state['game_selected'] = game_clicked
             st.session_state['tab_selected'] = selected
 
-        # st.markdown('8===============D')
-
+    # Page: Commands
     if selected == NAV_MENU[2] or st.session_state['tab_selected'] == selected:
         # with st_lottie_spinner(load_lottie_json(LOTTIE_LOCAL_JSON_PATH_CHOOSE), quality=DEFAULT_LOTTIE_QUALITY, height=600):
         #     time.sleep(3)
@@ -283,7 +325,7 @@ def main():
                 games_logos,
                 titles=[f"{str(i)}" for i in range(5)],
                 div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-                img_style={"margin": "5px", "height": "120px"},
+                img_style={"margin": "5px", "width": "150px"},
                 key='games'
             )
 
@@ -313,36 +355,6 @@ def main():
                             st.markdown('# Nash')
                         elif character_click == 3:
                             st.markdown('# M. Bison')
-
-
-# def start():
-#     if st.session_state['app_started'] is False:
-#         start_images = []
-#         for file in [LOTTIE_LOCAL_GIT_PATH_START_ARCADE]:
-#             with open(file, "rb") as image:
-#                 encoded = base64.b64encode(image.read()).decode()
-#                 start_images.append(f"data:image/jpeg;base64,{encoded}")
-
-#         start_clicked = clickable_images(
-#             start_images,
-#             titles=['Click here to begin the journey!'],
-#             div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-#             img_style={"margin": "5px", "height": "500px"},
-#         )
-
-#         st.markdown(st.session_state['app_started'])
-
-#         if start_clicked == 0:
-#             st.session_state['app_started'] = True
-#             st_lottie(load_lottie_json(LOTTIE_LOCAL_JSON_PATH_FIGHTING),
-#                 quality=DEFAULT_LOTTIE_QUALITY,
-#                 key="Fighting"
-#             )
-#         else:
-#             # st.markdown(start_clicked)
-#             pass
-
-#         st.markdown(st.session_state['app_started'])
 
 
 if __name__ == "__main__":
