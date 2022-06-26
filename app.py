@@ -1,11 +1,9 @@
-from asyncore import loop
 import time
 import os
 import base64
 import json
 from turtle import width
 import requests
-from PIL import Image
 
 import streamlit as st
 from streamlit_lottie import st_lottie, st_lottie_spinner
@@ -45,10 +43,13 @@ GGS_LOGO = './utils/imgs/static/games_logos/GGS_logo.png'
 MK11_LOGO = './utils/imgs/static/games_logos/MK11_logo.png'
 TEKKEN7_LOGO = './utils/imgs/static/games_logos/Tekken7_logo.png'
 
+SFV_PHOTOS_PATH = './utils/imgs/static/sfv/'
 SFV_RYU_AVATAR = './utils/imgs/static/characters_avatares/sfv_ryu_3.jpg'
 SFV_CHUNLI_AVATAR = './utils/imgs/static/characters_avatares/sfv_chunli.jpg'
 SFV_NASH_AVATAR = './utils/imgs/static/characters_avatares/sfv_nash.jpg'
 SFV_MBISON_AVATAR = './utils/imgs/static/characters_avatares/sfv_mbison.jpg'
+
+GGS_PHOTOS_PATH = './utils/imgs/static/ggs/'
 
 ST_PAGE_NAME ='TENSAI!'
 ST_PAGE_ICON = '👺'
@@ -80,6 +81,14 @@ BLABLABLA = '''
     BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
     BlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBlaBla
 '''
+
+
+def list_directory(path):
+    file_name_list = os.listdir(path)
+    pathes = []
+    for file_name in file_name_list:
+        pathes.append(path+file_name)
+    return pathes
 
 
 def build_padding_string(direction,value):
@@ -163,7 +172,7 @@ def get_social_media_href(social_medias):
 
 
 def load_lottie_json(json_path: str):
-    with open(json_path) as json_file:
+    with open(json_path, encoding="utf8") as json_file:
         return json.load(json_file)
 
 
@@ -199,6 +208,8 @@ def main():
         default_index=0
     )
 
+    # print(list_directory(SFV_PHOTOS_PATH+'avatares/'))
+
     # Page: Home
     if selected == NAV_MENU[0]:
         # About Us
@@ -210,7 +221,7 @@ def main():
             st_lottie(load_lottie_json(LOTTIE_LOCAL_JSON_PATH_OHAYOU),
                 quality=DEFAULT_LOTTIE_QUALITY,
                 loop=True,
-                # height=300,
+                height=300,
                 # width=500,
                 key="Ohayou"
             )
@@ -307,13 +318,15 @@ def main():
 
     # Page: Commands
     if selected == NAV_MENU[2] or st.session_state['tab_selected'] == selected:
+        title('GAMES',60,'center','black')
+        
         # with st_lottie_spinner(load_lottie_json(LOTTIE_LOCAL_JSON_PATH_CHOOSE), quality=DEFAULT_LOTTIE_QUALITY, height=600):
         #     time.sleep(3)
-        #     if st.session_state['game_selected'] is None or st.session_state['game_selected'] == -1:
-        #         st.markdown('# CHOOSE A GAME IN "Games" TAB')
-        #     else:
-        #         st.markdown(f"# {st.session_state['game_selected']}")
-        games_col1, games_col2, games_col3 = st.columns((0.2,0.9,0.2))
+            # if st.session_state['game_selected'] is None or st.session_state['game_selected'] == -1:
+            #     st.markdown('# CHOOSE A GAME IN "Games" TAB')
+            # else:
+            #     st.markdown(f"# {st.session_state['game_selected']}")
+        games_col1, games_col2, games_col3 = st.columns((0.2,5,0.2))
         with games_col2:
             games_logos = []
             for file in [SFV_LOGO,DBFZ_LOGO,GBVS_LOGO,GGS_LOGO,MK11_LOGO,TEKKEN7_LOGO]:
@@ -325,37 +338,54 @@ def main():
                 games_logos,
                 titles=[f"{str(i)}" for i in range(5)],
                 div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-                img_style={"margin": "5px", "width": "150px"},
+                img_style={"margin": "5px", "width": "300px"},
                 key='games'
             )
 
-            if game_clicked != -1:
-                if game_clicked == 0:
-                    characters_avatares = []
-                    for file in [SFV_RYU_AVATAR,SFV_CHUNLI_AVATAR,SFV_NASH_AVATAR,SFV_MBISON_AVATAR]:
-                        with open(file, "rb") as image:
-                            encoded = base64.b64encode(image.read()).decode()
-                            characters_avatares.append(f"data:image/jpeg;base64,{encoded}")
+            block_break()
+        if game_clicked != -1:
+            title('CHARACTERS',60,'center','black')
+            if game_clicked == 0:
+                characters_avatares = []
+                for file in list_directory(SFV_PHOTOS_PATH+'avatares/'):
+                    with open(file, "rb") as image:
+                        encoded = base64.b64encode(image.read()).decode()
+                        characters_avatares.append(f"data:image/jpeg;base64,{encoded}")
 
-                    character_click = clickable_images(
-                        characters_avatares,
-                        titles=[f"{str(i)}" for i in range(5)],
-                        div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-                        img_style={"margin": "4px", "height": "150px"},
-                        key='characters'
-                    )
-                    character_click
+                character_click = clickable_images(
+                    characters_avatares,
+                    titles=[f"{str(i)}" for i in range(len(list_directory(SFV_PHOTOS_PATH+'avatares/')))],
+                    div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
+                    img_style={"margin": "5px", "height": "194px"},
+                    key='characters'
+                )
+                character_click
 
-                    if character_click != -1:
-                        if character_click == 0:
-                            st.markdown('# Ryu')
-                        elif character_click == 1:
-                            st.markdown('# Chun-Li')
-                        elif character_click == 2:
-                            st.markdown('# Nash')
-                        elif character_click == 3:
-                            st.markdown('# M. Bison')
+                if character_click != -1:
+                    if character_click == 0:
+                        st.markdown('# Ryu')
+                    elif character_click == 1:
+                        st.markdown('# Chun-Li')
+                    elif character_click == 2:
+                        st.markdown('# Nash')
+                    elif character_click == 3:
+                        st.markdown('# M. Bison')
 
+            if game_clicked == 3:
+                characters_avatares = []
+                for file in list_directory(GGS_PHOTOS_PATH+'avatares/'):
+                    with open(file, "rb") as image:
+                        encoded = base64.b64encode(image.read()).decode()
+                        characters_avatares.append(f"data:image/jpeg;base64,{encoded}")
+
+                character_click = clickable_images(
+                    characters_avatares,
+                    titles=[f"{str(i)}" for i in range(len(list_directory(SFV_PHOTOS_PATH+'avatares/')))],
+                    div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
+                    img_style={"margin": "5px", "height": "224px"},
+                    key='characters'
+                )
+                character_click
 
 if __name__ == "__main__":
     main()
