@@ -10,6 +10,8 @@ from streamlit_lottie import st_lottie, st_lottie_spinner
 from st_clickable_images import clickable_images
 from streamlit_option_menu import option_menu
 
+from PIL import Image
+
 
 TENSAI_HEADER_PNG = './utils/imgs/static/tensai_header.png'
 
@@ -42,6 +44,7 @@ GBVS_LOGO = './utils/imgs/static/games_logos/GBVS_logo.png'
 GGS_LOGO = './utils/imgs/static/games_logos/GGS_logo.png'
 MK11_LOGO = './utils/imgs/static/games_logos/MK11_logo.png'
 TEKKEN7_LOGO = './utils/imgs/static/games_logos/Tekken7_logo.png'
+GAMES_LIST_LOGOS = [SFV_LOGO,DBFZ_LOGO,GBVS_LOGO,GGS_LOGO,MK11_LOGO,TEKKEN7_LOGO]
 
 SFV_PHOTOS_PATH = './utils/imgs/static/sfv/'
 SFV_RYU_AVATAR = './utils/imgs/static/characters_avatares/sfv_ryu_3.jpg'
@@ -50,6 +53,8 @@ SFV_NASH_AVATAR = './utils/imgs/static/characters_avatares/sfv_nash.jpg'
 SFV_MBISON_AVATAR = './utils/imgs/static/characters_avatares/sfv_mbison.jpg'
 
 GGS_PHOTOS_PATH = './utils/imgs/static/ggs/'
+DBFZ_PHOTOS_PATH = './utils/imgs/static/dbfz/'
+GBVS_PHOTOS_PATH = './utils/imgs/static/gbvs/'
 
 ST_PAGE_NAME ='TENSAI!'
 ST_PAGE_ICON = '👺'
@@ -304,21 +309,21 @@ def main():
             games_logos,
             titles=[f"{str(i)}" for i in range(5)],
             div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-            img_style={"margin": "5px", "width": "250px"},
+            img_style={"margin": "5px", "height": "150px"},
         )
-        games_col1, games_col2, games_col3, games_col4, games_col5 = st.columns((0.7,1.8,2,0.3,0.3))
-        with games_col2:
-            st.markdown(f'## {game_clicked}')
-            st.markdown(BLABLABLA)
+        # games_col1, games_col2, games_col3, games_col4, games_col5 = st.columns((0.7,1.8,2,0.3,0.3))
+        # with games_col2:
+        #     st.markdown(f'## {game_clicked}')
+        #     st.markdown(BLABLABLA)
 
-        game_clicked
-        if game_clicked != -1:
-            st.session_state['game_selected'] = game_clicked
-            st.session_state['tab_selected'] = selected
+        # game_clicked
+        # if game_clicked != -1:
+        #     st.session_state['game_selected'] = game_clicked
+        #     st.session_state['tab_selected'] = selected
 
     # Page: Commands
-    if selected == NAV_MENU[2] or st.session_state['tab_selected'] == selected:
-        title('GAMES',60,'center','black')
+    if selected == NAV_MENU[2]:
+        title('G A M E S',50,'center','black')
         
         # with st_lottie_spinner(load_lottie_json(LOTTIE_LOCAL_JSON_PATH_CHOOSE), quality=DEFAULT_LOTTIE_QUALITY, height=600):
         #     time.sleep(3)
@@ -328,64 +333,102 @@ def main():
             #     st.markdown(f"# {st.session_state['game_selected']}")
         games_col1, games_col2, games_col3 = st.columns((0.2,5,0.2))
         with games_col2:
-            games_logos = []
-            for file in [SFV_LOGO,DBFZ_LOGO,GBVS_LOGO,GGS_LOGO,MK11_LOGO,TEKKEN7_LOGO]:
-                with open(file, "rb") as image:
-                    encoded = base64.b64encode(image.read()).decode()
-                    games_logos.append(f"data:image/jpeg;base64,{encoded}")
+            games_expander = st.expander('Pick a Game')
+            with games_expander:
+                games_logos = []
+                for file in GAMES_LIST_LOGOS:
+                    with open(file, "rb") as image:
+                        encoded = base64.b64encode(image.read()).decode()
+                        games_logos.append(f"data:image/jpeg;base64,{encoded}")
 
-            game_clicked = clickable_images(
-                games_logos,
-                titles=[f"{str(i)}" for i in range(5)],
-                div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-                img_style={"margin": "5px", "width": "300px"},
-                key='games'
-            )
+                game_clicked = clickable_images(
+                    games_logos,
+                    titles=[f"{str(i)}" for i in range(5)],
+                    div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
+                    img_style={"margin": "5px", "height": "150px"},
+                    key='games'
+                )
+            
+            st.session_state['game_selected'] = game_clicked
+            # st.markdown(st.session_state['game_selected'])
+            
+            selected_game_image_path = Image.open(GAMES_LIST_LOGOS[game_clicked])
+            if game_clicked != -1:
+                st.image(selected_game_image_path, width=300)
 
             block_break()
+
         if game_clicked != -1:
-            title('CHARACTERS',60,'center','black')
-            if game_clicked == 0:
-                characters_avatares = []
-                for file in list_directory(SFV_PHOTOS_PATH+'avatares/'):
-                    with open(file, "rb") as image:
-                        encoded = base64.b64encode(image.read()).decode()
-                        characters_avatares.append(f"data:image/jpeg;base64,{encoded}")
+            title('C H A R A C T E R S',50,'center','black')
+            characters_col1, characters_col2, characters_col3 = st.columns((0.2,5,0.2))
+            with characters_col2:
+                games_expander = st.expander('Pick a Character')
+                with games_expander:
+                    if game_clicked == 0:
+                        characters_avatares = []
+                        for file in list_directory(SFV_PHOTOS_PATH+'avatares/'):
+                            with open(file, "rb") as image:
+                                encoded = base64.b64encode(image.read()).decode()
+                                characters_avatares.append(f"data:image/jpeg;base64,{encoded}")
 
-                character_click = clickable_images(
-                    characters_avatares,
-                    titles=[f"{str(i)}" for i in range(len(list_directory(SFV_PHOTOS_PATH+'avatares/')))],
-                    div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-                    img_style={"margin": "5px", "height": "194px"},
-                    key='characters'
-                )
-                character_click
+                        character_click = clickable_images(
+                            characters_avatares,
+                            titles=[f"{str(i)}" for i in range(len(list_directory(SFV_PHOTOS_PATH+'avatares/')))],
+                            div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
+                            img_style={"margin": "5px", "height": "200px"},
+                            key='characters'
+                        )
+                        selected_character_image_path = Image.open(list_directory(SFV_PHOTOS_PATH+'avatares/')[character_click])
+                        if character_click != -1:
+                            st.image(selected_character_image_path, width=300)
 
-                if character_click != -1:
-                    if character_click == 0:
-                        st.markdown('# Ryu')
-                    elif character_click == 1:
-                        st.markdown('# Chun-Li')
-                    elif character_click == 2:
-                        st.markdown('# Nash')
-                    elif character_click == 3:
-                        st.markdown('# M. Bison')
+                    if game_clicked == 1:
+                        characters_avatares = []
+                        for file in list_directory(DBFZ_PHOTOS_PATH+'avatares/'):
+                            with open(file, "rb") as image:
+                                encoded = base64.b64encode(image.read()).decode()
+                                characters_avatares.append(f"data:image/jpeg;base64,{encoded}")
 
-            if game_clicked == 3:
-                characters_avatares = []
-                for file in list_directory(GGS_PHOTOS_PATH+'avatares/'):
-                    with open(file, "rb") as image:
-                        encoded = base64.b64encode(image.read()).decode()
-                        characters_avatares.append(f"data:image/jpeg;base64,{encoded}")
+                        character_click = clickable_images(
+                            characters_avatares,
+                            titles=[f"{str(i)}" for i in range(len(list_directory(DBFZ_PHOTOS_PATH+'avatares/')))],
+                            div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
+                            img_style={"margin": "5px", "height": "200px"},
+                            key='characters'
+                        )
+                        character_click
 
-                character_click = clickable_images(
-                    characters_avatares,
-                    titles=[f"{str(i)}" for i in range(len(list_directory(SFV_PHOTOS_PATH+'avatares/')))],
-                    div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-                    img_style={"margin": "5px", "height": "224px"},
-                    key='characters'
-                )
-                character_click
+                    if game_clicked == 2:
+                        characters_avatares = []
+                        for file in list_directory(GBVS_PHOTOS_PATH+'avatares/'):
+                            with open(file, "rb") as image:
+                                encoded = base64.b64encode(image.read()).decode()
+                                characters_avatares.append(f"data:image/jpeg;base64,{encoded}")
+
+                        character_click = clickable_images(
+                            characters_avatares,
+                            titles=[f"{str(i)}" for i in range(len(list_directory(GBVS_PHOTOS_PATH+'avatares/')))],
+                            div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
+                            img_style={"margin": "5px", "height": "200px"},
+                            key='characters'
+                        )
+                        character_click
+
+                    if game_clicked == 3:
+                        characters_avatares = []
+                        for file in list_directory(GGS_PHOTOS_PATH+'avatares/'):
+                            with open(file, "rb") as image:
+                                encoded = base64.b64encode(image.read()).decode()
+                                characters_avatares.append(f"data:image/jpeg;base64,{encoded}")
+
+                        character_click = clickable_images(
+                            characters_avatares,
+                            titles=[f"{str(i)}" for i in range(len(list_directory(GGS_PHOTOS_PATH+'avatares/')))],
+                            div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
+                            img_style={"margin": "5px", "height": "200px"},
+                            key='characters'
+                        )
+                        character_click
 
 if __name__ == "__main__":
     main()
