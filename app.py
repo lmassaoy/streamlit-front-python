@@ -46,15 +46,17 @@ MK11_LOGO = './utils/imgs/static/games_logos/MK11_logo.png'
 TEKKEN7_LOGO = './utils/imgs/static/games_logos/Tekken7_logo.png'
 GAMES_LIST_LOGOS = [SFV_LOGO,DBFZ_LOGO,GBVS_LOGO,GGS_LOGO,MK11_LOGO,TEKKEN7_LOGO]
 
-SFV_PHOTOS_PATH = './utils/imgs/static/sfv/'
+
 SFV_RYU_AVATAR = './utils/imgs/static/characters_avatares/sfv_ryu_3.jpg'
 SFV_CHUNLI_AVATAR = './utils/imgs/static/characters_avatares/sfv_chunli.jpg'
 SFV_NASH_AVATAR = './utils/imgs/static/characters_avatares/sfv_nash.jpg'
 SFV_MBISON_AVATAR = './utils/imgs/static/characters_avatares/sfv_mbison.jpg'
 
+SFV_PHOTOS_PATH = './utils/imgs/static/sfv/'
 GGS_PHOTOS_PATH = './utils/imgs/static/ggs/'
 DBFZ_PHOTOS_PATH = './utils/imgs/static/dbfz/'
 GBVS_PHOTOS_PATH = './utils/imgs/static/gbvs/'
+GAMES_PHOTOS_PATHES = [SFV_PHOTOS_PATH+'avatares/',DBFZ_PHOTOS_PATH+'avatares/',GBVS_PHOTOS_PATH+'avatares/',GGS_PHOTOS_PATH+'avatares/']
 
 ST_PAGE_NAME ='TENSAI!'
 ST_PAGE_ICON = '👺'
@@ -206,6 +208,9 @@ def main():
     if 'tab_selected' not in st.session_state:
         st.session_state['tab_selected'] = 0
 
+    if 'choose_lottie_passed' not in st.session_state:
+        st.session_state['choose_lottie_passed'] = False
+
     selected = option_menu("",
         NAV_MENU, 
         icons=['house', 'controller', 'dpad', 'gear-fill', 'caret-right-square', 'github'],
@@ -299,41 +304,19 @@ def main():
 
     # Page: Games
     if selected == NAV_MENU[1]:
-        games_logos = []
-        for file in [SFV_LOGO,DBFZ_LOGO,GBVS_LOGO,GGS_LOGO,MK11_LOGO,TEKKEN7_LOGO]:
-            with open(file, "rb") as image:
-                encoded = base64.b64encode(image.read()).decode()
-                games_logos.append(f"data:image/jpeg;base64,{encoded}")
-
-        game_clicked = clickable_images(
-            games_logos,
-            titles=[f"{str(i)}" for i in range(5)],
-            div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-            img_style={"margin": "5px", "height": "150px"},
-        )
-        # games_col1, games_col2, games_col3, games_col4, games_col5 = st.columns((0.7,1.8,2,0.3,0.3))
-        # with games_col2:
-        #     st.markdown(f'## {game_clicked}')
-        #     st.markdown(BLABLABLA)
-
-        # game_clicked
-        # if game_clicked != -1:
-        #     st.session_state['game_selected'] = game_clicked
-        #     st.session_state['tab_selected'] = selected
+        pass
 
     # Page: Commands
     if selected == NAV_MENU[2]:
-        title('G A M E S',50,'center','black')
-        
-        # with st_lottie_spinner(load_lottie_json(LOTTIE_LOCAL_JSON_PATH_CHOOSE), quality=DEFAULT_LOTTIE_QUALITY, height=600):
-        #     time.sleep(3)
-            # if st.session_state['game_selected'] is None or st.session_state['game_selected'] == -1:
-            #     st.markdown('# CHOOSE A GAME IN "Games" TAB')
-            # else:
-            #     st.markdown(f"# {st.session_state['game_selected']}")
-        games_col1, games_col2, games_col3 = st.columns((0.2,5,0.2))
+        if st.session_state['choose_lottie_passed'] is False:
+            with st_lottie_spinner(load_lottie_json(LOTTIE_LOCAL_JSON_PATH_CHOOSE), quality=DEFAULT_LOTTIE_QUALITY, height=500):
+                time.sleep(1.75)
+            st.session_state['choose_lottie_passed'] = True
+            
+        games_col1, games_col2, games_col3, games_col4, games_col5 = st.columns((2.1,5,1,5,0.2))
         with games_col2:
-            games_expander = st.expander('Pick a Game')
+            st.markdown('# Select a Game')
+            games_expander = st.expander('Games')
             with games_expander:
                 games_logos = []
                 for file in GAMES_LIST_LOGOS:
@@ -351,18 +334,24 @@ def main():
             
             st.session_state['game_selected'] = game_clicked
             # st.markdown(st.session_state['game_selected'])
-            
-            selected_game_image_path = Image.open(GAMES_LIST_LOGOS[game_clicked])
-            if game_clicked != -1:
-                st.image(selected_game_image_path, width=300)
 
-            block_break()
+        with games_col4:    
+            # selected_game_image_path = Image.open(GAMES_LIST_LOGOS[game_clicked])
+            if game_clicked != -1:
+                # st.image(selected_game_image_path, use_column_width='always')
+                img_format = os.path.splitext(GAMES_LIST_LOGOS[game_clicked])[-1].replace('.', '')
+                bin_str = get_base64_of_bin_file(GAMES_LIST_LOGOS[game_clicked])
+                html_code = f'''
+                    <img class="center" height="150px" src="data:image/{img_format};base64,{bin_str}"/>'''
+                st.markdown(html_code, unsafe_allow_html=True)
+
+        block_break()
 
         if game_clicked != -1:
-            title('C H A R A C T E R S',50,'center','black')
-            characters_col1, characters_col2, characters_col3 = st.columns((0.2,5,0.2))
+            characters_col1, characters_col2, characters_col3, characters_col4, characters_col5 = st.columns((1.35,7,0.1,0.1,0.1))
             with characters_col2:
-                games_expander = st.expander('Pick a Character')
+                st.markdown('# Select a Character')
+                games_expander = st.expander('Characters')
                 with games_expander:
                     if game_clicked == 0:
                         characters_avatares = []
@@ -396,7 +385,6 @@ def main():
                             img_style={"margin": "5px", "height": "200px"},
                             key='characters'
                         )
-                        character_click
 
                     if game_clicked == 2:
                         characters_avatares = []
@@ -412,7 +400,6 @@ def main():
                             img_style={"margin": "5px", "height": "200px"},
                             key='characters'
                         )
-                        character_click
 
                     if game_clicked == 3:
                         characters_avatares = []
@@ -428,7 +415,142 @@ def main():
                             img_style={"margin": "5px", "height": "200px"},
                             key='characters'
                         )
-                        character_click
+            block_break()
+
+            if character_click != -1:
+                character_header_col1, character_header_col2, character_header_col3, character_header_col4, character_header_col5 = st.columns((1.4,1.6,0.5,5,0.1))
+                with character_header_col2:
+                    img_format = os.path.splitext(list_directory(GAMES_PHOTOS_PATHES[game_clicked])[character_click])[-1].replace('.', '')
+                    bin_str = get_base64_of_bin_file(list_directory(GAMES_PHOTOS_PATHES[game_clicked])[character_click])
+                    html_code = f'''
+                        <img class="center" width="300px" src="data:image/{img_format};base64,{bin_str}"/>'''
+                    st.markdown(html_code, unsafe_allow_html=True)
+
+                with character_header_col4:
+                    title('Zooye',100,'left','black')
+                    st.markdown('"I am the will of the world."')
+
+                character_line1_col1, character_line1_col2, character_line1_col3, character_line1_col4, character_line1_col5 = st.columns((1.4,1.6,0.5,5,0.1))
+                with character_line1_col2:
+                    ATTRIBUTES = '''
+                        ### Attributes
+                        **Style**: Rushdown
+
+                        **Alignment**: BlaBlaBla
+
+                        **Origin**: BlaBlaBLa
+                    '''
+                    st.markdown(ATTRIBUTES)
+                with character_line1_col4:
+                    st.markdown('### Story / Description')
+                    st.markdown(BLABLA)
+
+                character_moves_col1, character_moves_col2, character_moves_col3, character_moves_col4, character_moves_col5 = st.columns((0.8,2,0.1,2,0.5))
+                with character_moves_col2:
+                    title('Move List',30,'center','black')
+                    title('Special Moves',20,'left','black')
+                    MOVE_LIST_A = '''
+                    <table>
+                        <thead>
+                            <tr>
+                                <th colspan="3">Versions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>Light</th>
+                                <th>Medium</th>
+                                <th>Heavy</th>
+                            </tr>
+                            <tr>
+                                <td>236L</td>
+                                <td>236M</td>
+                                <td>236H</td>
+                            </tr>
+                        </tbody>
+                    </table>'''
+                    st.markdown('### Summon Dragon')
+                    st.markdown("Zooey calls Lyrn to perform one of three actions. Each action takes a certain amount of Zooey's Dragon Gauge, and can be done for as long as the gauge is not empty. Lyrn will despawn once the gauge is fully depleted and go on 12 second cooldown. All three of these specials will set Lyrn in place wherever he stops for about three seconds. Afterwards, Lyrn returns to float by Zooey's side. While set or floating by Zooey, Lyrn cannot be hit.")
+                    st.markdown(MOVE_LIST_A, unsafe_allow_html=True)
+                    block_break()
+
+                    MOVE_LIST_B = '''
+                    <table>
+                        <thead>
+                            <tr>
+                                <th colspan="3">Versions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>Light</th>
+                                <th>Medium</th>
+                                <th>Heavy</th>
+                            </tr>
+                            <tr>
+                                <td>214L</td>
+                                <td>214M</td>
+                                <td>214H</td>
+                            </tr>
+                        </tbody>
+                    </table>'''
+                    st.markdown('### Spinning Slash')
+                    st.markdown("Zooey moves forward and swings her blade. The distance covered changes depending on the button pressed; L moves the least distance, M and H move the same distance. Chains into two different followups, allowing for confirms into knockdown or frame traps.")
+                    st.markdown(MOVE_LIST_B, unsafe_allow_html=True)
+                    block_break()
+
+                    MOVE_LIST_C = '''
+                    <table>
+                        <thead>
+                            <tr>
+                                <th colspan="3">Versions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>Light</th>
+                                <th>Medium</th>
+                                <th>Heavy</th>
+                            </tr>
+                            <tr>
+                                <td>22L</td>
+                                <td>22M</td>
+                                <td>22H</td>
+                            </tr>
+                        </tbody>
+                    </table>'''
+                    st.markdown('### Thunder')
+                    st.markdown("Zooey strikes the ground with her blade and calls down lightning in one of three areas. The blade strike itself has a hitbox. The strike point for the lightning depends on which button was pressed, marked by a glowing group of sparks on the ground. The minimum range on the L and M versions makes the lightning summon harmlessly offscreen when done in the corner. The lightning strike itself can be delayed by holding L, M, H, or the Skill Button and will fall shortly after Zooey is no longer holding an attack button (except U) or after about three seconds of holding, allowing Zooey to coordinate with the strikes to extend her pressure. The button(s) being held can be switched freely without the lightning striking as long as at least one of the attack buttons is held.")
+                    st.markdown(MOVE_LIST_C, unsafe_allow_html=True)
+                    block_break()
+
+                    title('Super Skybound Art',20,'left','black')
+                    MOVE_LIST_D = '''
+                    <table>
+                        <thead>
+                            <tr>
+                                <th colspan="3">Versions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>A</th>
+                                <th>B</th>
+                            </tr>
+                            <tr>
+                                <td>236236U</td>
+                                <td>236S+U</td>
+                            </tr>
+                        </tbody>
+                    </table>'''
+                    st.markdown('### Armageddon')
+                    st.markdown("Zooey reveals her true form as the Grand Order, then rushing forward and hit the opponent. Very slow but deals good damage as a combo ender.")
+                    st.markdown(MOVE_LIST_D, unsafe_allow_html=True)
+                    block_break()
+
+                with character_moves_col4:
+                    title('Combos',30,'center','black')
+                    st.markdown(BLABLA)
 
 if __name__ == "__main__":
     main()
